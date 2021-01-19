@@ -40,6 +40,7 @@ services:
           - ./metaboref_data:/usr/local/virtuoso-opensource/share/virtuoso/vad/dumps
       ports:
           - 8890:8890
+
       command: >
         bash -c '
         bash /virtuoso.sh & sleep 6 &&
@@ -55,19 +56,18 @@ services:
       container_name: metaboref
       depends_on : [metaboref_virtuoso]
       volumes:
-        - ./metaboref_data:/ttl
+          - ./metaboref_data:/ttl
 
-    selenium:
+    selenium_cors:
       build:
         context: .
         dockerfile: Dockerfile_modificationCorsVirtuoso
       environment:
-          virtuoso_site: "http://localhost:8890/"
+          virtuoso_site: "http://metaboref_virtuoso:8890/"
           login: ${LOGIN_VIRTUOSO}
           passwd: ${PASSWORD_VIRTUOSO}
       depends_on: [ chrome, metaboref_virtuoso ]
-      networks:
-        - selenium_net
+
       command: >
           bash -c '
             until `curl --output /dev/null --silent --head --fail http://localhost:8890/` ; do
@@ -80,10 +80,3 @@ services:
       image: selenium/standalone-chrome
       environment:
           START_XVFB: 'false'
-      ports:
-        - 4444:4444
-      networks:
-        - selenium_net
-
-networks:
-  selenium_net:

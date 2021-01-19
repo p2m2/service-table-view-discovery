@@ -15,41 +15,34 @@ async function virtuoso_cors() {
     .build();
 
   console.log('starting chrome...');
-
   console.log("Virtuoso URL:"+process.env.virtuoso_site+"conductor/");
 
   let vars = {}
 
   try {
-    await driver.get(process.env.virtuoso_site)
-  } catch (e) {
+      await driver.get(process.env.virtuoso_site)
+      await driver.manage().window().setRect(1920, 1054)
+      await driver.switchTo().frame(0)
+      await driver.findElement(By.linkText("Conductor")).click()
+      await driver.switchTo().defaultContent()
+      await driver.findElement(By.id("t_login_usr")).sendKeys("dba")
+      await driver.findElement(By.id("t_login_pwd")).sendKeys("dba")
+      await driver.findElement(By.id("login_btn")).click()
+      await driver.findElement(By.linkText("Web Application Server")).click()
+      await driver.findElement(By.linkText("Virtual Domains & Directories")).click()
+      await driver.findElement(By.css("tr:nth-child(4) #t1_toggle")).click()
+      await driver.findElement(By.id("label10")).click()
+      await driver.findElement(By.id("label10")).click()
+      await driver.findElement(By.id("t1_toggle")).click()
+      await driver.findElement(By.css(".listing_row_odd:nth-child(17) a:nth-child(1)")).click()
+      await driver.findElement(By.id("t_cors")).click()
+      await driver.findElement(By.id("t_cors")).sendKeys("*")
+      await driver.findElement(By.name("save")).click()
+      await driver.quit();
+  }  catch (e) {
     console.log(e)
   }
-
-  console.log(await driver.manage().getCookies());
-  const pageSource = await driver.wait(until.elementLocated(By.css('body')), 10000).getAttribute('innerHTML');
-  console.log('pageSource: ', pageSource);
-
-
-//await driver.manage().window().setRect(945, 1020)
- // await driver.switchTo().frame(0)
-//  await driver.findElement(By.linkText("Conductor")).click()
-  //await driver.switchTo().defaultContent()
-  await driver.findElement(By.id("t_login_usr")).sendKeys(process.env.login)
-  await driver.findElement(By.id("t_login_pwd")).sendKeys(process.env.passwd)
-  await driver.findElement(By.id("login_btn")).click()
-  await driver.findElement(By.linkText("Web Application Server")).click()
-  await driver.findElement(By.linkText("Virtual Domains & Directories")).click()
-  await driver.findElement(By.id("t1_toggle")).click()
-  await driver.findElement(By.css(".listing_row_odd:nth-child(17) a:nth-child(1)")).click()
-  await driver.findElement(By.css("tr:nth-child(23)")).click()
-  await driver.findElement(By.id("t_cors")).click()
-  await driver.findElement(By.id("t_cors")).clear()
-  await driver.findElement(By.id("t_cors")).sendKeys("*")
-  await driver.findElement(By.name("save")).click()
-  await driver.quit();
 }
-
 
 virtuoso_cors().then( x => console.log("Fin !"))
                .catch(error => console.error(error))
