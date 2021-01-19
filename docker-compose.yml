@@ -1,21 +1,28 @@
 version: "3"
 services:
+  ##  - NGINX -
+  ##  routage des services
+  ##  - VIRTUOSO => MetaboRef
+  ##  - Table-View-Discovery
+  ##
     nginx:
       image: nginx:1.19
       volumes:
         - ./nginx.conf:/tmp/nginx.conf
-        - ./output/nginx/log:/var/log/nginx
+        - ./nginx_log:/var/log/nginx
       ports:
         - ${EXPOSE_PORT}:80
       env_file:
         - nginx.env
       command: /bin/bash -c "envsubst < /tmp/nginx.conf > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
 
+   ## IHM 1 - Table-View-Discovery
     table-view:
       image: inraep2m2/table-view-discovery:0.0.2
       volumes:
         - ./endpoints.js:/usr/local/apache2/htdocs/endpoints.js
 
+   ## Rdf Database - Virtuoso -  MetaboRef
     metaboref_virtuoso:
       image: tenforce/virtuoso:virtuoso7.2.5
       container_name: metaboref_virtuoso
@@ -51,13 +58,18 @@ services:
         bash /usr/local/virtuoso-opensource/share/virtuoso/vad/dumps/load_metaboref.sh &&
         wait'
 
+  ## -------------------------------------------------
+  ## Construction de MetaboRef
+  ##
     metaboref:
       image: inraep2m2/metaboref:0.0.1
       container_name: metaboref
       depends_on : [metaboref_virtuoso]
       volumes:
           - ./metaboref_data:/ttl
-
+  ## -------------------------------------------------
+  ## Activation de CORS dans VIRTUOSO
+  ##
     selenium_cors:
       build:
         context: .
@@ -69,12 +81,11 @@ services:
       depends_on: [ chrome, metaboref_virtuoso ]
 
       command: >
-          bash -c '
-            until `curl --output /dev/null --silent --head --fail http://localhost:8890/` ; do
-              echo "Waiting Metaboref turtle file - sleeping" ;
-              sleep 5 ;
-            done && node virtuoso_cors.js'
+          bash -c 'sleep 3m && echo " **** configure CORS / Virtuoso  ****" && node virtuoso_cors.js'
 
+  ## -------------------------------------------------
+  ## Chrome Pour Selenium
+  ##
     chrome:
       container_name: chrome
       image: selenium/standalone-chrome
