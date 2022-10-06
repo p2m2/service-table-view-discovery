@@ -18,7 +18,7 @@ services:
 
    ## IHM 1 - Table-View-Discovery
     table-view:
-      image: inraep2m2/table-view-discovery:0.0.2
+      image: inraep2m2/discovery-table-view:latest
       volumes:
         - ./endpoints.js:/usr/local/apache2/htdocs/endpoints.js
 
@@ -62,7 +62,7 @@ services:
   ## Construction de MetaboRef
   ##
     metaboref:
-      image: inraep2m2/metaboref:0.0.1
+      image: inraep2m2/database-metaboref:latest
       container_name: metaboref
       depends_on : [metaboref_virtuoso]
       volumes:
@@ -71,13 +71,12 @@ services:
   ## Activation de CORS dans VIRTUOSO
   ##
     selenium_cors:
-      build:
-        context: .
-        dockerfile: Dockerfile_modificationCorsVirtuoso
+      image: inraep2m2/service-allow-cors-virtuoso:latest
       environment:
           virtuoso_site: "http://metaboref_virtuoso:8890/"
           login: ${LOGIN_VIRTUOSO}
           passwd: ${PASSWORD_VIRTUOSO}
+          chrome_container: chrome
       depends_on: [ chrome, metaboref_virtuoso ]
 
       command: >
